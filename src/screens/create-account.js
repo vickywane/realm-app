@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import Realm from 'realm';
+import { REALM_ID } from "../credentials";
 
 const {height, width} = Dimensions.get('window');
 
@@ -16,15 +17,16 @@ const CreateAccount = (props) => {
   const [Email, setEmail] = React.useState('');
   const [Password, setPassword] = React.useState('');
   const [hasCreatedAccount, setAccountCreation] = React.useState(false);
+  const [ error, setError  ] = React.useState(null)
 
   const [token, setToken] = React.useState('');
   const [tokenID, setTokenID] = React.useState('');
   const [isLoading, setLoading] = React.useState(false);
 
-  handleCreateAccount = async () => {
+  const handleCreateAccount = async () => {
     setLoading(true);
-    const app = new Realm.App({id: 'first-realm-application-xurco'});
-    // Authenticate the user
+    const app = new Realm.App({id: REALM_ID});
+    // Create user account
     app.emailPasswordAuth
       .registerUser(Email, Password)
       .then(() => {
@@ -33,11 +35,12 @@ const CreateAccount = (props) => {
       })
       .catch((e) => {
         setLoading(false);
+        setError(e)
         console.error('Failed to log in', e);
       });
   };
 
-  handleVerification = async () => {
+  const handleVerification = async () => {
     setLoading(true);
     const app = new Realm.App({id: 'first-realm-application-xurco'});
 
@@ -57,11 +60,17 @@ const CreateAccount = (props) => {
     <View style={styles.body}>
       {!hasCreatedAccount ? (
         <View>
-          <Text style={[styles.title, styles.alignCenter]}>
-            {' '}
-            Offline App - Create Account{' '}
-          </Text>
-          <View style={{marginVertical: 10}} />
+          <Text style={[styles.title, styles.alignCenter]}> MongoDB Realm App</Text>
+          <View style={{ marginVertical: 5 }} />
+          <Text style={{ textAlign: "center", fontSize: 15 }}> Serverless App powered by MongoDB Realm </Text>
+          <View style={{ marginVertical: 15 }} />
+
+          {error && (
+            <Text style={{textAlign: 'center', fontSize: 14, color: 'red'}}>
+              {' '}
+              {error.message}{' '}
+            </Text>
+          )}
 
           <View style={styles.input}>
             <TextInput
@@ -87,7 +96,7 @@ const CreateAccount = (props) => {
               onPress={() => handleCreateAccount()}
               style={[styles.button, styles.alignCenter]}>
               {!isLoading ? (
-                <Text> Create Account </Text>
+                <Text style={{color : "#fff"}} > Create Account </Text>
               ) : (
                 <ActivityIndicator color="#282c34" />
               )}
@@ -156,48 +165,51 @@ const CreateAccount = (props) => {
 
 const styles = StyleSheet.create({
   flex: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'center',
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
   },
   title: {
-    fontSize: 20,
-    textAlign: 'center',
-    fontWeight: 'bold',
+    fontSize: 22,
+    textAlign: "center",
+    fontWeight: "500",
   },
 
   infoText: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 14,
-    color: 'grey',
+    color: "grey",
   },
 
   body: {
+    backgroundColor: "#fff",
     height,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     paddingHorizontal: 10,
     borderWidth: 1,
-    borderColor: 'grey',
+    borderRadius: 5,
+    borderColor: "#c0c0c0",
     height: 45,
     width: width - 30,
   },
   alignCenter: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
   },
   button: {
     height: 40,
-    width: 200,
     borderWidth: 1,
-    borderColor: '#282c34',
-    color: '#fff',
+    borderColor: "#28BFFD",
+    backgroundColor: "#28BFFD",
+    color: "#fff",
+    width: width - 30,
     fontSize: 16,
     borderRadius: 3,
   },

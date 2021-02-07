@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from "react";
 import {
   View,
   Text,
@@ -7,30 +7,33 @@ import {
   Dimensions,
   ActivityIndicator,
   TouchableOpacity,
-} from 'react-native';
-import Realm from 'realm';
+} from "react-native";
+import Realm from "realm";
+import { REALM_ID } from "../credentials";
 
-const {height, width} = Dimensions.get('window');
+const { height, width } = Dimensions.get("window");
 
 const Login = (props) => {
-  const [Email, setEmail] = React.useState('');
-  const [Password, setPassword] = React.useState('');
+  const [Email, setEmail] = React.useState("");
+  const [Password, setPassword] = React.useState("");
   const [isLoading, setLoading] = React.useState(false);
+  const [error, setLoginError] = React.useState(null);
 
-  handleLogin = async () => {
+  const handleLogin = async () => {
     setLoading(true);
 
     const credentials = Realm.Credentials.emailPassword(Email, Password);
     // Authenticate the user
-    const app = new Realm.App({id: 'first-realm-application-xurco'});
+    const app = new Realm.App({ id: REALM_ID });
 
     app
       .logIn(credentials)
-      .then((data) => {
-        props.navigation.navigate('Home');
+      .then(() => {
+        props.navigation.navigate("Home");
       })
       .catch((e) => {
         console.log(e);
+        setLoginError(e)
         setLoading(false);
       });
   };
@@ -38,25 +41,29 @@ const Login = (props) => {
   return (
     <View style={styles.body}>
       <View>
-        <Text style={[styles.title, styles.alignCenter]}> Offline App - Login</Text>
-        <View style={{marginVertical: 10}} />
+        <Text style={[styles.title, styles.alignCenter]}> MongoDB Realm App</Text>
+        <View style={{ marginVertical: 5 }} />
+        <Text style={{ textAlign: "center", fontSize: 15 }}> Serverless App powered by MongoDB Realm </Text>
+        <View style={{ marginVertical: 15 }} />
 
+        {error && <Text style={{ textAlign: "center", fontSize: 14, color: "red" }}> {error.message} </Text>}
         <View style={styles.input}>
           <TextInput
             value={Email}
-            placeholder="Your email. John@mail.com"
+            placeholder="Enter your email address"
             onChangeText={(value) => setEmail(value)}
           />
         </View>
-        <View style={{marginVertical: 10}} />
+        <View style={{ marginVertical: 10 }} />
         <View style={styles.input}>
           <TextInput
             value={Password}
-            placeholder="Your Password"
+            secureTextEntry={true}
+            placeholder="Enter your Password"
             onChangeText={(value) => setPassword(value)}
           />
         </View>
-        <View style={{marginVertical: 10}} />
+        <View style={{ marginVertical: 10 }} />
 
         <View style={styles.alignCenter}>
           <TouchableOpacity
@@ -64,20 +71,20 @@ const Login = (props) => {
             disabled={isLoading}
             style={[styles.button, styles.alignCenter]}>
             {!isLoading ? (
-              <Text> Login Account </Text>
+              <Text style={{ color: "#fff", fontSize: 15 }}> Sign In </Text>
             ) : (
-              <ActivityIndicator color="#282c34" />
+              <ActivityIndicator color="#fff" />
             )}
           </TouchableOpacity>
         </View>
-        <View style={{marginVertical: 10}} />
+        <View style={{ marginVertical: 10 }} />
 
         <TouchableOpacity
-          onPress={() => props.navigation.navigate('create-account')}>
+          onPress={() => props.navigation.navigate("create-account")}>
           <View style={styles.flex}>
             <Text style={styles.infoText}>Don't Have An Account?</Text>
 
-            <Text style={[styles.infoText, {color: 'black', marginLeft: 10}]}>
+            <Text style={[styles.infoText, { color: "black", marginLeft: 10 }]}>
               Create Account
             </Text>
           </View>
@@ -89,48 +96,51 @@ const Login = (props) => {
 
 const styles = StyleSheet.create({
   flex: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'center',
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
   },
   title: {
-    fontSize: 20,
-    textAlign: 'center',
-    fontWeight: 'bold',
+    fontSize: 22,
+    textAlign: "center",
+    fontWeight: "500",
   },
 
   infoText: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 14,
-    color: 'grey',
+    color: "grey",
   },
 
   body: {
+    backgroundColor: "#fff",
     height,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     paddingHorizontal: 10,
     borderWidth: 1,
-    borderColor: 'grey',
+    borderRadius: 5,
+    borderColor: "#c0c0c0",
     height: 45,
     width: width - 30,
   },
   alignCenter: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
   },
   button: {
     height: 40,
-    width: 200,
     borderWidth: 1,
-    borderColor: '#282c34',
-    color: '#fff',
+    borderColor: "#28BFFD",
+    backgroundColor: "#28BFFD",
+    color: "#fff",
+    width: width - 30,
     fontSize: 16,
     borderRadius: 3,
   },

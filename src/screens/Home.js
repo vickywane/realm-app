@@ -1,125 +1,89 @@
-import * as React from 'react';
+import * as React from "react";
 import {
-    View,
-    Text,
-    Image,
-    TouchableOpacity,
-    StyleSheet,
-    FlatList,
-    Dimensions,
-} from 'react-native';
+  View,
+  Image,
+  StyleSheet,
+  FlatList,
+  Dimensions,
+  ActivityIndicator,
+} from "react-native";
+import { gql, useQuery } from "@apollo/client";
 
-const {height, width} = Dimensions.get('screen');
+const { height, width } = Dimensions.get("screen");
 
-const posts = [
-    {
-        id: 1,
-        img_uri:
-            'https://images.pexels.com/photos/4160089/pexels-photo-4160089.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500',
-        content: 'Some test content for creating a post',
-    },
-    {
-        id: 2,
-        img_uri:
-            'https://images.pexels.com/photos/4160089/pexels-photo-4160089.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500',
-        content: 'Some test content for creating a post',
-    },
-];
+const DOCUMENT_QUERY = gql`
+    query {
+        offlineRealmApps {
+            _id
+            img_uri
+        }
+    }
+`;
 
 const Home = (props) => {
-    const [fetchMore, showFetchMore] = React.useState(false);
-
-    React.useEffect(() => {
-        props.navigation.setOptions({
-            headerRight: () => (
-                <View style={{marginRight: 15}}>
-                    <Text
-                        style={{color: '#fff'}}
-                        onPress={() => props.navigation.navigate('CreatePost')}>
-                        Create Post
-                    </Text>
-                </View>
-            ),
-        });
-    }, []);
-
+  const { data, loading, error } = useQuery(DOCUMENT_QUERY);
+  if (loading) {
     return (
-        <View style={{backgroundColor: '#fff', height}}>
-            <FlatList
-                data={posts}
-                onEndReached={() => showFetchMore(true)}
-                ListEmptyComponent={() => (
-                    <View>
-                        <Text> No posts to show. </Text>
-                        <Text
-                            onPress={() =>
-                                props.navigation.navigate('CreatePost')
-                            }>
-                            Tap to create new post.
-                        </Text>
-                    </View>
-                )}
-                ListFooterComponent={() => (
-                    <View style={[styles.alignCenter, {marginTop: 10}]}>
-                        {fetchMore ? (
-                            <TouchableOpacity
-                                onPress={() => {}}
-                                style={[styles.button, styles.alignCenter]}>
-                                <Text> Fetch more posts </Text>
-                            </TouchableOpacity>
-                        ) : null}
-                    </View>
-                )}
-                renderItem={({item, index, separators}) => (
-                    <View style={styles.alignCenter}>
-                        <View style={styles.post} key={item.id}>
-                            <Image
-                                source={item.img_uri}
-                                resizeMode="cover"
-                                style={styles.img}
-                            />
-                            <Text> {item.content} </Text>
-                        </View>
-                    </View>
-                )}
-            />
-        </View>
+      <View style={{ height, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator color="blue" />
+      </View>
     );
+  }
+
+  return (
+    <View style={{ backgroundColor: "#fff", height }}>
+      <FlatList
+        data={data.offlineRealmApps}
+        keyExtractor={(item) => item._id}
+        renderItem={({ item }) => (
+          <View style={styles.alignCenter}>
+            <View style={styles.post} key={item.id}>
+              <Image
+                source={{ uri: item.img_uri }}
+                resizeMode="contain"
+                style={styles.img}
+              />
+            </View>
+          </View>
+        )}
+      />
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-    img: {
-        height: 150,
-        width: width - 20,
-    },
-    alignCenter: {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    posts: {
-        display: 'flex',
-        flexDirection: 'column',
-        marginVertical: 10,
-    },
-    post: {
-        width: width - 20,
-        borderWidth: 1,
-        borderColor: 'grey',
-        display: 'flex',
-        flex: 1,
-        height: 200,
-        marginVertical: 10,
-    },
-    button: {
-        height: 40,
-        width: 170,
-        borderWidth: 1,
-        borderColor: '#282c34',
-        color: '#fff',
-        fontSize: 16,
-        borderRadius: 3,
-    },
+  img: {
+    height: 250,
+    width: width - 5,
+    borderRadius: 5,
+  },
+  alignCenter: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  posts: {
+    display: "flex",
+    flexDirection: "column",
+    marginVertical: 5,
+  },
+  post: {
+    width: width - 10,
+    borderRadius: 7,
+    display: "flex",
+    flex: 1,
+    height: 250,
+    marginVertical: 3,
+  },
+  button: {
+    height: 40,
+    width: 170,
+    borderWidth: 1,
+    borderColor: "#282c34",
+    color: "#fff",
+    fontSize: 16,
+    borderRadius: 3,
+  },
 });
 
 export default Home;

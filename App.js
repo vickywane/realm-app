@@ -1,26 +1,46 @@
-import 'react-native-gesture-handler';
-import * as React from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import {createStackNavigator} from '@react-navigation/stack';
-import {ApolloClient, ApolloProvider} from '@apollo/client';
-import {InMemoryCache} from 'apollo-cache-inmemory';
-import Realm from 'realm';
+import "react-native-gesture-handler";
+import * as React from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import {
+  ApolloClient,
+  ApolloProvider,
+  createHttpLink,
+} from "@apollo/client";
+import { InMemoryCache } from "apollo-cache-inmemory";
+import Realm from "realm";
+import { setContext } from "@apollo/client/link/context";
 
-import Login from './src/screens/login';
-import CreateAccount from './src/screens/create-account';
-import Home from './src/screens/Home';
-import CreatePost from './src/screens/CreatePost';
+import Login from "./src/screens/login";
+import CreateAccount from "./src/screens/create-account";
+import Home from "./src/screens/Home";
+import CreatePost from "./src/screens/CreatePost";
+import { REALM_GRAPHQL_ENDPOINT } from "./src/credentials";
 
 const Stack = createStackNavigator();
+const app = new Realm.App({ id: "first-realm-application-xurco" });
+
+const link = createHttpLink({
+  uri: REALM_GRAPHQL_ENDPOINT,
+});
+
+const authLink = setContext((_, { headers }) => {
+  const token = app.currentUser.accessToken;
+  return {
+    headers: {
+      ...headers,
+      Authorization: `Bearer ${token}`,
+    },
+  };
+});
+
+
 const client = new ApolloClient({
   cache: new InMemoryCache(),
-  uri:
-    'https://realm.mongodb.com/api/client/v2.0/app/first-realm-application-xurco/graphql',
+  link: authLink.concat(link),
 });
 
 export default function App() {
-  const app = new Realm.App({id: 'first-realm-application-xurco'});
-
   return (
     <ApolloProvider client={client}>
       <NavigationContainer>
@@ -43,13 +63,14 @@ export default function App() {
           <Stack.Screen
             options={{
               headerLeft: null,
-              title: 'All posts',
+              title: "Splash Images",
               headerStyle: {
-                backgroundColor: '#282c34',
+                backgroundColor: "#282c34",
               },
-              headerTintColor: '#fff',
+              headerTintColor: "#fff",
               headerTitleStyle: {
-                fontWeight: 'bold',
+                fontSize: 17,
+                fontWeight: "600",
               },
             }}
             name="Home"
@@ -58,13 +79,13 @@ export default function App() {
 
           <Stack.Screen
             options={{
-              title: 'Create New Post',
+              title: "Create New Post",
               headerStyle: {
-                backgroundColor: '#282c34',
+                backgroundColor: "#282c34",
               },
-              headerTintColor: '#fff',
+              headerTintColor: "#fff",
               headerTitleStyle: {
-                fontWeight: 'bold',
+                fontWeight: "bold",
               },
             }}
             name="CreatePost"
